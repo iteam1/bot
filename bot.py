@@ -4,25 +4,32 @@ import random
 class RobotEyesApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("Robot Eyes")
+        self.root.title("Cute Anime Robot Eyes")
 
         # Set the window size
         self.root.geometry("300x300")
 
-        # Create a canvas to draw the robot eyes
-        self.canvas = tk.Canvas(self.root, width=300, height=300, bg='white')
+        # Create a canvas with a black background
+        self.canvas = tk.Canvas(self.root, width=300, height=300, bg='black')
         self.canvas.pack()
 
-        # Draw robot head (optional)
-        self.canvas.create_oval(50, 50, 250, 250, fill='gray', outline='black', width=5)
+        # Draw robot head (soft, round shape for cuteness)
+        self.canvas.create_oval(50, 50, 250, 250, fill='#333333', outline='#333333', width=3)
 
-        # Draw robot eyes
+        # Draw larger, expressive robot eyes
         self.left_eye = self.canvas.create_oval(70, 70, 130, 130, fill='white', outline='black', width=3)
         self.right_eye = self.canvas.create_oval(170, 70, 230, 130, fill='white', outline='black', width=3)
 
-        # Draw pupils (initial position)
+        # Draw pupils (larger pupils for cuteness)
         self.left_pupil = self.canvas.create_oval(90, 90, 110, 110, fill='black')
         self.right_pupil = self.canvas.create_oval(190, 90, 210, 110, fill='black')
+
+        # Add shiny highlights to the eyes for an anime effect
+        self.left_highlight = self.canvas.create_oval(100, 95, 110, 105, fill='white', outline='white')
+        self.right_highlight = self.canvas.create_oval(200, 95, 210, 105, fill='white', outline='white')
+
+        # Make the smile smaller
+        self.mouth = self.canvas.create_arc(120, 170, 180, 200, start=0, extent=-180, style=tk.ARC, width=5, outline='white')
 
         # Add event listener to follow mouse
         self.root.bind('<Motion>', self.follow_mouse)
@@ -51,8 +58,8 @@ class RobotEyesApp:
         delta_y = mouse_y - eye_y
 
         # Add some randomness to simulate the eyes "jerking" or "twitching"
-        delta_x += random.uniform(-5, 5)
-        delta_y += random.uniform(-5, 5)
+        delta_x += random.uniform(-2, 2)
+        delta_y += random.uniform(-2, 2)
 
         # Limit pupil movement to stay within the eye bounds
         max_distance = 12
@@ -82,6 +89,8 @@ class RobotEyesApp:
         if random.random() < 0.02:  # Blink with a low probability
             self.canvas.itemconfig(self.left_pupil, state='hidden')
             self.canvas.itemconfig(self.right_pupil, state='hidden')
+            self.canvas.itemconfig(self.left_highlight, state='hidden')
+            self.canvas.itemconfig(self.right_highlight, state='hidden')
 
             # Make it visible again after a short delay
             self.root.after(200, self.open_eyes)
@@ -90,6 +99,8 @@ class RobotEyesApp:
         """Open the eyes after blinking"""
         self.canvas.itemconfig(self.left_pupil, state='normal')
         self.canvas.itemconfig(self.right_pupil, state='normal')
+        self.canvas.itemconfig(self.left_highlight, state='normal')
+        self.canvas.itemconfig(self.right_highlight, state='normal')
 
     def random_twitch(self):
         """Occasionally move the eyes in a random direction"""
@@ -97,17 +108,17 @@ class RobotEyesApp:
             # Choose a random direction to move the eyes (left/right/up/down)
             direction = random.choice(['left', 'right', 'up', 'down'])
             if direction == 'left':
-                self.canvas.move(self.left_eye, -5, 0)
-                self.canvas.move(self.right_eye, -5, 0)
+                self.canvas.move(self.left_eye, -3, 0)
+                self.canvas.move(self.right_eye, -3, 0)
             elif direction == 'right':
-                self.canvas.move(self.left_eye, 5, 0)
-                self.canvas.move(self.right_eye, 5, 0)
+                self.canvas.move(self.left_eye, 3, 0)
+                self.canvas.move(self.right_eye, 3, 0)
             elif direction == 'up':
-                self.canvas.move(self.left_eye, 0, -5)
-                self.canvas.move(self.right_eye, 0, -5)
+                self.canvas.move(self.left_eye, 0, -3)
+                self.canvas.move(self.right_eye, 0, -3)
             elif direction == 'down':
-                self.canvas.move(self.left_eye, 0, 5)
-                self.canvas.move(self.right_eye, 0, 5)
+                self.canvas.move(self.left_eye, 0, 3)
+                self.canvas.move(self.right_eye, 0, 3)
 
             # Return eyes to center after a short delay
             self.root.after(500, self.reset_eye_position)
