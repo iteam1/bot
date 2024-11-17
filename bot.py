@@ -1,136 +1,129 @@
-import tkinter as tk
-import random
+import pygame
+import sys
+import time
 
-class RobotEyesApp:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("Cute Anime Robot Eyes")
+# Initialize pygame
+pygame.init()
 
-        # Set the window size
-        self.root.geometry("300x300")
+# Initial screen dimensions
+SCREEN_WIDTH, SCREEN_HEIGHT = 800, 400
 
-        # Create a canvas with a black background
-        self.canvas = tk.Canvas(self.root, width=300, height=300, bg='black')
-        self.canvas.pack()
+# Colors
+BLACK = (0, 0, 0)
+EYE_COLOR = (0, 255, 0)  # Single color for the eyes (green)
+WHITE = (255, 255, 255)  # White for inner anime-style highlights
+TEXT_COLOR = (255, 255, 255)  # Text color (white)
 
-        # Draw robot head (soft, round shape for cuteness)
-        self.canvas.create_oval(50, 50, 250, 250, fill='#333333', outline='#333333', width=3)
+# Screen setup with resizable option
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.RESIZABLE)
+pygame.display.set_caption("Cute Anime Robot Eyes")
 
-        # Draw larger, expressive robot eyes
-        self.left_eye = self.canvas.create_oval(70, 70, 130, 130, fill='white', outline='black', width=3)
-        self.right_eye = self.canvas.create_oval(170, 70, 230, 130, fill='white', outline='black', width=3)
+# Font setup
+FONT = pygame.font.Font(None, 50)  # Default font with size 50
 
-        # Draw pupils (larger pupils for cuteness)
-        self.left_pupil = self.canvas.create_oval(90, 90, 110, 110, fill='black')
-        self.right_pupil = self.canvas.create_oval(190, 90, 210, 110, fill='black')
+# Function to calculate eye properties based on current screen dimensions
+def calculate_eye_properties(width, height):
+    eye_width = width // 8  # Eye width is 1/8th of the screen width
+    eye_height = height // 3  # Eye height is 1/3rd of the screen height
+    left_eye_center = (width // 3, height // 2)  # Position the left eye
+    right_eye_center = (2 * width // 3, height // 2)  # Position the right eye
+    return eye_width, eye_height, left_eye_center, right_eye_center
 
-        # Add shiny highlights to the eyes for an anime effect
-        self.left_highlight = self.canvas.create_oval(100, 95, 110, 105, fill='white', outline='white')
-        self.right_highlight = self.canvas.create_oval(200, 95, 210, 105, fill='white', outline='white')
+# Function to draw an anime-style eye
+def draw_anime_eye(center, width, height, emotion):
+    if emotion == "neutral":
+        # Base eye shape
+        pygame.draw.ellipse(screen, EYE_COLOR, (center[0] - width // 2,
+                                                center[1] - height // 2,
+                                                width, height))
+        # Inner highlight for cuteness
+        pygame.draw.ellipse(screen, WHITE, (center[0] - width // 4,
+                                            center[1] - height // 4,
+                                            width // 4, height // 4))
+    elif emotion == "blink":
+        # Blink (narrow horizontal line)
+        pygame.draw.rect(screen, EYE_COLOR, (center[0] - width // 2,
+                                             center[1] - 10,  # Narrow the height
+                                             width, 20))
 
-        # Make the smile smaller
-        self.mouth = self.canvas.create_arc(120, 170, 180, 200, start=0, extent=-180, style=tk.ARC, width=5, outline='white')
 
-        # Add event listener to follow mouse
-        self.root.bind('<Motion>', self.follow_mouse)
+# Function to display neutral emotion
+def draw_neutral(eye_width, eye_height, left_eye_center, right_eye_center):
+    screen.fill(BLACK)
+    draw_anime_eye(left_eye_center, eye_width, eye_height, "neutral")
+    draw_anime_eye(right_eye_center, eye_width, eye_height, "neutral")
+    pygame.display.flip()
 
-        # Start the animation loop (blinking, etc.)
-        self.animate()
 
-    def follow_mouse(self, event):
-        """Make pupils follow the mouse cursor"""
-        # Coordinates for the centers of the eyes
-        left_eye_center = (100, 100)
-        right_eye_center = (200, 100)
+# Function to display blink emotion
+def draw_blink(eye_width, eye_height, left_eye_center, right_eye_center):
+    screen.fill(BLACK)
+    draw_anime_eye(left_eye_center, eye_width, eye_height, "blink")
+    draw_anime_eye(right_eye_center, eye_width, eye_height, "blink")
+    pygame.display.flip()
+    time.sleep(0.2)  # Briefly hold the blink
+    draw_neutral(eye_width, eye_height, left_eye_center, right_eye_center)
 
-        # Move left pupil towards the mouse cursor
-        self.move_pupil(self.left_pupil, left_eye_center, event.x, event.y)
 
-        # Move right pupil towards the mouse cursor
-        self.move_pupil(self.right_pupil, right_eye_center, event.x, event.y)
+def display_streaming_text(text, delay=0.1):
+    # Create a larger font size for the centered text
+    large_font = pygame.font.Font(None, SCREEN_HEIGHT // 6)  # Font size proportional to screen height
+    displayed_text = ""
+    text_width, text_height = large_font.size(text)  # Calculate size of the full text
 
-    def move_pupil(self, pupil, eye_center, mouse_x, mouse_y):
-        """Move pupil towards the mouse position but with some random 'jerk' effect"""
-        eye_x, eye_y = eye_center
+    # Calculate centered position
+    x = (SCREEN_WIDTH - text_width) // 2
+    y = (SCREEN_HEIGHT - text_height) // 2
 
-        # Calculate the direction to the mouse position
-        delta_x = mouse_x - eye_x
-        delta_y = mouse_y - eye_y
+    screen.fill(BLACK)  # Clear screen
 
-        # Add some randomness to simulate the eyes "jerking" or "twitching"
-        delta_x += random.uniform(-2, 2)
-        delta_y += random.uniform(-2, 2)
+    for char in text:
+        displayed_text += char
+        # Render the text up to the current character
+        text_surface = large_font.render(displayed_text, True, EYE_COLOR)
+        # Clear the text area and draw updated text
+        screen.fill(BLACK)  # Clear the screen for consistency
+        screen.blit(text_surface, (x, y))
+        pygame.display.flip()
+        time.sleep(delay)  # Pause between characters
 
-        # Limit pupil movement to stay within the eye bounds
-        max_distance = 12
-        distance = (delta_x**2 + delta_y**2)**0.5
-        if distance > max_distance:
-            factor = max_distance / distance
-            delta_x *= factor
-            delta_y *= factor
 
-        # Move the pupil
-        self.canvas.coords(pupil, eye_x - 10 + delta_x, eye_y - 10 + delta_y, eye_x + 10 + delta_x, eye_y + 10 + delta_y)
+# Main loop
+def main():
+    emotions = ["neutral", "blink"]
+    emotion_index = 0
 
-    def animate(self):
-        """Animate the robot by making it blink and twitch its eyes"""
-        # Start blinking at random intervals
-        self.blinking()
+    clock = pygame.time.Clock()
+    global SCREEN_WIDTH, SCREEN_HEIGHT
 
-        # Add random eye twitches or head tilts
-        self.random_twitch()
+    while True:
+        # Handle events
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.VIDEORESIZE:
+                SCREEN_WIDTH, SCREEN_HEIGHT = event.w, event.h
+                screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.RESIZABLE)
 
-        # Repeat the animation loop
-        self.root.after(100, self.animate)
+        # Recalculate eye properties based on current screen size
+        EYE_WIDTH, EYE_HEIGHT, LEFT_EYE_CENTER, RIGHT_EYE_CENTER = calculate_eye_properties(SCREEN_WIDTH, SCREEN_HEIGHT)
 
-    def blinking(self):
-        """Randomly make the robot blink"""
-        # Randomly choose whether to blink or not
-        if random.random() < 0.02:  # Blink with a low probability
-            self.canvas.itemconfig(self.left_pupil, state='hidden')
-            self.canvas.itemconfig(self.right_pupil, state='hidden')
-            self.canvas.itemconfig(self.left_highlight, state='hidden')
-            self.canvas.itemconfig(self.right_highlight, state='hidden')
+        # Display the current emotion
+        if emotions[emotion_index] == "neutral":
+            draw_neutral(EYE_WIDTH, EYE_HEIGHT, LEFT_EYE_CENTER, RIGHT_EYE_CENTER)
 
-            # Make it visible again after a short delay
-            self.root.after(200, self.open_eyes)
+        elif emotions[emotion_index] == "blink":
+            draw_blink(EYE_WIDTH, EYE_HEIGHT, LEFT_EYE_CENTER, RIGHT_EYE_CENTER)
 
-    def open_eyes(self):
-        """Open the eyes after blinking"""
-        self.canvas.itemconfig(self.left_pupil, state='normal')
-        self.canvas.itemconfig(self.right_pupil, state='normal')
-        self.canvas.itemconfig(self.left_highlight, state='normal')
-        self.canvas.itemconfig(self.right_highlight, state='normal')
+        # Pause and show streaming text
+        time.sleep(1.5)
+        # display_streaming_text("Hello, World!", delay=0.1)
 
-    def random_twitch(self):
-        """Occasionally move the eyes in a random direction"""
-        if random.random() < 0.05:  # 5% chance of twitching
-            # Choose a random direction to move the eyes (left/right/up/down)
-            direction = random.choice(['left', 'right', 'up', 'down'])
-            if direction == 'left':
-                self.canvas.move(self.left_eye, -3, 0)
-                self.canvas.move(self.right_eye, -3, 0)
-            elif direction == 'right':
-                self.canvas.move(self.left_eye, 3, 0)
-                self.canvas.move(self.right_eye, 3, 0)
-            elif direction == 'up':
-                self.canvas.move(self.left_eye, 0, -3)
-                self.canvas.move(self.right_eye, 0, -3)
-            elif direction == 'down':
-                self.canvas.move(self.left_eye, 0, 3)
-                self.canvas.move(self.right_eye, 0, 3)
+        emotion_index = (emotion_index + 1) % len(emotions)
 
-            # Return eyes to center after a short delay
-            self.root.after(500, self.reset_eye_position)
+        clock.tick(30)
 
-    def reset_eye_position(self):
-        """Reset eyes back to their original position"""
-        self.canvas.coords(self.left_eye, 70, 70, 130, 130)
-        self.canvas.coords(self.right_eye, 170, 70, 230, 130)
 
-# Create the main window
-root = tk.Tk()
-app = RobotEyesApp(root)
-
-# Run the application
-root.mainloop()
+if __name__ == "__main__":
+    main()
