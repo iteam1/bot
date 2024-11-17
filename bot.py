@@ -92,6 +92,7 @@ def display_streaming_text(text, delay=0.1):
 def main():
     emotions = ["neutral", "blink"]
     emotion_index = 0
+    text_index = 0
 
     clock = pygame.time.Clock()
     global SCREEN_WIDTH, SCREEN_HEIGHT
@@ -116,11 +117,14 @@ def main():
         elif emotions[emotion_index] == "blink":
             draw_blink(EYE_WIDTH, EYE_HEIGHT, LEFT_EYE_CENTER, RIGHT_EYE_CENTER)
 
-        # Pause and show streaming text
+        if text_index == 5:
+            display_streaming_text("Hello, World!", delay=0.1)
+            text_index = 0
+
         time.sleep(1.5)
-        # display_streaming_text("Hello, World!", delay=0.1)
 
         emotion_index = (emotion_index + 1) % len(emotions)
+        text_index +=1
 
         clock.tick(30)
 
