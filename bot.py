@@ -1,133 +1,182 @@
 import pygame
-import sys
+import random
 import time
 
-# Initialize pygame
+# Pygame initialization
 pygame.init()
 
-# Initial screen dimensions
-SCREEN_WIDTH, SCREEN_HEIGHT = 800, 400
+# Constants
+SCREEN_WIDTH = 128
+SCREEN_HEIGHT = 64
+SCREEN_SIZE = (SCREEN_WIDTH, SCREEN_HEIGHT)
 
 # Colors
+WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
-EYE_COLOR = (0, 255, 0)  # Single color for the eyes (green)
-WHITE = (255, 255, 255)  # White for inner anime-style highlights
-TEXT_COLOR = (255, 255, 255)  # Text color (white)
 
-# Screen setup with resizable option
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.RESIZABLE)
-pygame.display.set_caption("Cute Anime Robot Eyes")
+# Display setup
+screen = pygame.display.set_mode(SCREEN_SIZE)
+pygame.display.set_caption('Eye Animation')
 
-# Font setup
-FONT = pygame.font.Font(None, 50)  # Default font with size 50
+# Eye constants
+ref_eye_height = 40
+ref_eye_width = 40
+ref_space_between_eye = 10
+ref_corner_radius = 10
 
-# Function to calculate eye properties based on current screen dimensions
-def calculate_eye_properties(width, height):
-    eye_width = width // 8  # Eye width is 1/8th of the screen width
-    eye_height = height // 3  # Eye height is 1/3rd of the screen height
-    left_eye_center = (width // 3, height // 2)  # Position the left eye
-    right_eye_center = (2 * width // 3, height // 2)  # Position the right eye
-    return eye_width, eye_height, left_eye_center, right_eye_center
+# Initial eye positions
+left_eye_x = 32
+left_eye_y = 32
+right_eye_x = 32 + ref_eye_width + ref_space_between_eye
+right_eye_y = 32
+left_eye_height = ref_eye_height
+right_eye_height = ref_eye_height
+left_eye_width = ref_eye_width
+right_eye_width = ref_eye_width
 
-# Function to draw an anime-style eye
-def draw_anime_eye(center, width, height, emotion):
-    if emotion == "neutral":
-        # Base eye shape
-        pygame.draw.ellipse(screen, EYE_COLOR, (center[0] - width // 2,
-                                                center[1] - height // 2,
-                                                width, height))
-        # Inner highlight for cuteness
-        pygame.draw.ellipse(screen, WHITE, (center[0] - width // 4,
-                                            center[1] - height // 4,
-                                            width // 4, height // 4))
-    elif emotion == "blink":
-        # Blink (narrow horizontal line)
-        pygame.draw.rect(screen, EYE_COLOR, (center[0] - width // 2,
-                                             center[1] - 10,  # Narrow the height
-                                             width, 20))
+# Animation state
+demo_mode = 1
+max_animation_index = 8
+current_animation_index = 0
 
-
-# Function to display neutral emotion
-def draw_neutral(eye_width, eye_height, left_eye_center, right_eye_center):
+# Function to draw the eyes
+def draw_eyes():
     screen.fill(BLACK)
-    draw_anime_eye(left_eye_center, eye_width, eye_height, "neutral")
-    draw_anime_eye(right_eye_center, eye_width, eye_height, "neutral")
-    pygame.display.flip()
+    # Draw left eye
+    pygame.draw.rect(screen, WHITE, (left_eye_x - left_eye_width // 2, left_eye_y - left_eye_height // 2, left_eye_width, left_eye_height), border_radius=ref_corner_radius)
+    # Draw right eye
+    pygame.draw.rect(screen, WHITE, (right_eye_x - right_eye_width // 2, right_eye_y - right_eye_height // 2, right_eye_width, right_eye_height), border_radius=ref_corner_radius)
+    pygame.display.update()
 
+# Function to center the eyes
+def center_eyes():
+    global left_eye_x, left_eye_y, right_eye_x, right_eye_y, left_eye_height, right_eye_height
+    left_eye_x = SCREEN_WIDTH // 2 - ref_eye_width // 2 - ref_space_between_eye // 2
+    left_eye_y = SCREEN_HEIGHT // 2
+    right_eye_x = SCREEN_WIDTH // 2 + ref_eye_width // 2 + ref_space_between_eye // 2
+    right_eye_y = SCREEN_HEIGHT // 2
+    left_eye_height = ref_eye_height
+    right_eye_height = ref_eye_height
+    draw_eyes()
 
-# Function to display blink emotion
-def draw_blink(eye_width, eye_height, left_eye_center, right_eye_center):
-    screen.fill(BLACK)
-    draw_anime_eye(left_eye_center, eye_width, eye_height, "blink")
-    draw_anime_eye(right_eye_center, eye_width, eye_height, "blink")
-    pygame.display.flip()
-    time.sleep(0.2)  # Briefly hold the blink
-    draw_neutral(eye_width, eye_height, left_eye_center, right_eye_center)
+# Function for blinking animation
+def blink(speed=12):
+    global left_eye_height, right_eye_height
+    draw_eyes()
+    for _ in range(3):
+        left_eye_height -= speed
+        right_eye_height -= speed
+        draw_eyes()
+        time.sleep(0.01)
+    for _ in range(3):
+        left_eye_height += speed
+        right_eye_height += speed
+        draw_eyes()
+        time.sleep(0.01)
 
+# Function for "sleep" animation
+def sleep():
+    global left_eye_height, right_eye_height
+    left_eye_height = 2
+    right_eye_height = 2
+    draw_eyes()
 
-def display_streaming_text(text, delay=0.1):
-    # Create a larger font size for the centered text
-    large_font = pygame.font.Font(None, SCREEN_HEIGHT // 6)  # Font size proportional to screen height
-    displayed_text = ""
-    text_width, text_height = large_font.size(text)  # Calculate size of the full text
+# Function for "wake up" animation
+def wakeup():
+    sleep()
+    for h in range(0, ref_eye_height + 1, 2):
+        global left_eye_height, right_eye_height
+        left_eye_height = h
+        right_eye_height = h
+        draw_eyes()
+        time.sleep(0.05)
 
-    # Calculate centered position
-    x = (SCREEN_WIDTH - text_width) // 2
-    y = (SCREEN_HEIGHT - text_height) // 2
+# Function to simulate "happy eyes"
+def happy_eye():
+    center_eyes()
+    offset = ref_eye_height // 2
+    for _ in range(10):
+        pygame.draw.polygon(screen, BLACK, [
+            (left_eye_x - left_eye_width // 2 - 1, left_eye_y + offset),
+            (left_eye_x + left_eye_width // 2 + 1, left_eye_y + 5 + offset),
+            (left_eye_x - left_eye_width // 2 - 1, left_eye_y + left_eye_height + offset)
+        ])
+        pygame.draw.polygon(screen, BLACK, [
+            (right_eye_x + right_eye_width // 2 + 1, right_eye_y + offset),
+            (right_eye_x - left_eye_width // 2 - 1, right_eye_y + 5 + offset),
+            (right_eye_x + right_eye_width // 2 + 1, right_eye_y + right_eye_height + offset)
+        ])
+        offset -= 2
+        pygame.display.update()
+        time.sleep(0.01)
+    time.sleep(1)
 
-    screen.fill(BLACK)  # Clear screen
+# Function for saccade (quick movement of the eyes)
+def saccade(direction_x, direction_y):
+    global left_eye_x, right_eye_x, left_eye_y, right_eye_y, left_eye_height, right_eye_height
+    direction_x_movement_amplitude = 8
+    direction_y_movement_amplitude = 6
+    blink_amplitude = 8
 
-    for char in text:
-        displayed_text += char
-        # Render the text up to the current character
-        text_surface = large_font.render(displayed_text, True, EYE_COLOR)
-        # Clear the text area and draw updated text
-        screen.fill(BLACK)  # Clear the screen for consistency
-        screen.blit(text_surface, (x, y))
-        pygame.display.flip()
-        time.sleep(delay)  # Pause between characters
+    left_eye_x += direction_x * direction_x_movement_amplitude
+    right_eye_x += direction_x * direction_x_movement_amplitude
+    left_eye_y += direction_y * direction_y_movement_amplitude
+    right_eye_y += direction_y * direction_y_movement_amplitude
+    left_eye_height -= blink_amplitude
+    right_eye_height -= blink_amplitude
+    draw_eyes()
 
+    left_eye_x += direction_x * direction_x_movement_amplitude
+    right_eye_x += direction_x * direction_x_movement_amplitude
+    left_eye_y += direction_y * direction_y_movement_amplitude
+    right_eye_y += direction_y * direction_y_movement_amplitude
+    left_eye_height += blink_amplitude
+    right_eye_height += blink_amplitude
+    draw_eyes()
+
+# Function to trigger animation based on index
+def launch_animation_with_index(animation_index):
+    global current_animation_index
+    if animation_index > max_animation_index:
+        animation_index = 8
+    if animation_index == 0:
+        wakeup()
+    elif animation_index == 1:
+        center_eyes()
+    elif animation_index == 2:
+        blink(10)
+    elif animation_index == 3:
+        blink(20)
+    elif animation_index == 4:
+        happy_eye()
+    elif animation_index == 5:
+        sleep()
+    elif animation_index == 6:
+        saccade(1, 0)
+    elif animation_index == 7:
+        saccade(-1, 0)
+    elif animation_index == 8:
+        center_eyes()
+        for _ in range(20):
+            dir_x = random.choice([-1, 0, 1])
+            dir_y = random.choice([-1, 0, 1])
+            saccade(dir_x, dir_y)
+            time.sleep(0.01)
 
 # Main loop
-def main():
-    emotions = ["neutral", "blink"]
-    emotion_index = 0
-    text_index = 0
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
 
-    clock = pygame.time.Clock()
-    global SCREEN_WIDTH, SCREEN_HEIGHT
+    if demo_mode == 1:
+        launch_animation_with_index(current_animation_index)
+        current_animation_index += 1
+        if current_animation_index > max_animation_index:
+            current_animation_index = 0
 
-    while True:
-        # Handle events
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            elif event.type == pygame.VIDEORESIZE:
-                SCREEN_WIDTH, SCREEN_HEIGHT = event.w, event.h
-                screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.RESIZABLE)
+    pygame.display.update()
+    time.sleep(0.5)
 
-        # Recalculate eye properties based on current screen size
-        EYE_WIDTH, EYE_HEIGHT, LEFT_EYE_CENTER, RIGHT_EYE_CENTER = calculate_eye_properties(SCREEN_WIDTH, SCREEN_HEIGHT)
-
-        # Display the current emotion
-        if emotions[emotion_index] == "neutral":
-            draw_neutral(EYE_WIDTH, EYE_HEIGHT, LEFT_EYE_CENTER, RIGHT_EYE_CENTER)
-
-        elif emotions[emotion_index] == "blink":
-            draw_blink(EYE_WIDTH, EYE_HEIGHT, LEFT_EYE_CENTER, RIGHT_EYE_CENTER)
-
-        if text_index == 5:
-            display_streaming_text("Hello, World!", delay=0.1)
-            text_index = 0
-
-        time.sleep(1.5)
-
-        emotion_index = (emotion_index + 1) % len(emotions)
-        text_index +=1
-
-        clock.tick(30)
-
-
-if __name__ == "__main__":
-    main()
+pygame.quit()
