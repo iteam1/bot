@@ -6,8 +6,8 @@ import time
 pygame.init()
 
 # Define constants for screen width and height
-SCREEN_WIDTH = 128
-SCREEN_HEIGHT = 64
+SCREEN_WIDTH = 360 #128
+SCREEN_HEIGHT = 240 #64
 
 # Create the Pygame display surface
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
