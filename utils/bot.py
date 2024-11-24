@@ -6,8 +6,8 @@ import time
 pygame.init()
 
 # Define constants for screen width and height
-SCREEN_WIDTH = 128
-SCREEN_HEIGHT = 64
+SCREEN_WIDTH = 360 #128
+SCREEN_HEIGHT = 240 #64
 
 # Create the Pygame display surface
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -31,11 +31,12 @@ right_eye_width = ref_eye_width
 # Demo mode
 demo_mode = True
 current_animation_index = 0
-max_animation_index = 8
+max_animation_index = 10
 
 # Colors
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
+GREEN = (0,255,0)
 
 # Function to draw eyes
 def draw_eyes(update=True):
@@ -120,6 +121,48 @@ def happy_eye():
         pygame.display.update()
         time.sleep(0.1)
 
+# Function to simulate sad
+def sad_eye():
+    center_eyes(False)
+    offset = ref_eye_height // 2
+    for _ in range(10):
+        # For the left eye, flip the triangle vertically by adjusting the Y-axis
+        pygame.draw.polygon(screen, BLACK, [
+            (left_eye_x - left_eye_width / 2 - 1, left_eye_y - offset),  # Y is now negative to flip
+            (left_eye_x + left_eye_width / 2 + 1, left_eye_y - 5 - offset),  # Y is now negative to flip
+            (left_eye_x - left_eye_width / 2 - 1, left_eye_y - left_eye_height - offset)  # Y is now negative to flip
+        ])
+        
+        # For the right eye, flip the triangle vertically by adjusting the Y-axis
+        pygame.draw.polygon(screen, BLACK, [
+            (right_eye_x + right_eye_width / 2 + 1, right_eye_y - offset),  # Y is now negative to flip
+            (right_eye_x - right_eye_width / 2 - 1, right_eye_y - 5 - offset),  # Y is now negative to flip
+            (right_eye_x + right_eye_width / 2 + 1, right_eye_y - right_eye_height - offset)  # Y is now negative to flip
+        ])
+        offset -= 2
+        pygame.display.update()
+        time.sleep(0.1)
+
+
+def angry_eye():
+    center_eyes(False)
+    offset = ref_eye_height // 2
+    for _ in range(10):
+        pygame.draw.polygon(screen, BLACK, [
+            (left_eye_x - left_eye_width / 2 - 1, left_eye_y - 2 - offset),  
+            (left_eye_x + left_eye_width / 2 + 1, left_eye_y + 6 - offset),  
+            (left_eye_x - left_eye_width / 2 - 1, left_eye_y - left_eye_height - offset)
+        ])
+        
+        pygame.draw.polygon(screen, BLACK, [
+            (right_eye_x + right_eye_width / 2 + 1, right_eye_y - 2 - offset),  
+            (right_eye_x - right_eye_width / 2 - 1, right_eye_y + 6 - offset),  
+            (right_eye_x + right_eye_width / 2 + 1, right_eye_y - right_eye_height - offset)
+        ])
+        offset -= 2
+        pygame.display.update()
+        time.sleep(0.1)
+
 # Function for saccade (quick eye movement)
 def saccade(direction_x, direction_y):
     global left_eye_x, left_eye_y, right_eye_x, right_eye_y, left_eye_height, right_eye_height
@@ -152,7 +195,7 @@ def saccade(direction_x, direction_y):
 # Function to execute animation based on index
 def launch_animation_with_index(animation_index):
     if animation_index > max_animation_index:
-        animation_index = 8
+        animation_index = 10
 
     if animation_index == 0:
         wakeup()
@@ -181,6 +224,12 @@ def launch_animation_with_index(animation_index):
             time.sleep(0.1)
             saccade(-dir_x, -dir_y)
             time.sleep(0.1)
+    elif animation_index == 9:
+        sad_eye()
+
+    elif animation_index == 10:
+        angry_eye()
+
 
 # Main loop
 running = True
