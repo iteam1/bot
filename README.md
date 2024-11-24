@@ -3,7 +3,9 @@ A.I bot for embedded systems
 
 # references
 
-https://github.com/intellar/oled_eye_display/blob/main/arduino/control_display/control_display.ino
+https://github.com/playfultechnology/esp32-eyes/tree/main
+
+https://github.com/intellar/oled_eye_display
 
 https://www.waveshare.com/product/raspberry-pi/displays/3.5inch-rpi-lcd-c.htm
 
