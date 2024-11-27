@@ -2,7 +2,7 @@
 A.I bot for embedded systems
 
 # installation
-- edit config `sudo rspi-config`
+- edit config `sudo raspi-config`
 - edit `config.txt`: `sudo nano /boot/firmware/config.txt`
 - install `pygame`: `sudo apt install python3-pygame -o Acquire::http::Proxy="false"`
 # references
