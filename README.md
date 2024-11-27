@@ -1,6 +1,8 @@
 # bot
 A.I bot for embedded systems
 
+# installation
+- install `pygame`: `sudo apt install python3-pygame -o Acquire::http::Proxy="false"`
 # references
 
 https://github.com/playfultechnology/esp32-eyes/tree/main
